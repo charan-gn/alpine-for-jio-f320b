@@ -1,0 +1,71 @@
+name: build boot.img
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  KERNEL_BRANCH: LA.UM.10.6.2.c26
+  ALPINE_BRANCH: v3.19
+  CROSS: arm-linux-gnueabihf-
+
+jobs:
+  boot-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf \
+            bison flex bc lzop cpio xz-utils curl
+
+      - name: Build UI binary (static)
+        run: |
+          ${CROSS}gcc -Os -static -o out-ui initramfs/ui.c
+
+      - name: Clone CAF msm-4.9 kernel
+        run: |
+          git clone --depth=1 -b "$KERNEL_BRANCH" \
+            https://git.codelinaro.org/clo/la/kernel/msm-4.9.git kernel
+
+      - name: Kernel config + zImage + DTBs
+        run: |
+          cd kernel
+          cp ../files/kernel_config .config
+          make ARCH=arm CROSS_COMPILE="$CROSS" olddefconfig
+          make ARCH=arm CROSS_COMPILE="$CROSS" -j"$(nproc)" zImage dtbs
+          cp arch/arm/boot/zImage ../out-zImage
+
+      - name: Select board DTB
+        run: |
+          cd kernel/arch/arm/boot/dts
+          DTB=$(ls qcom/msm8909-qrd-skub*.dtb 2>/dev/null | head -1)
+          [ -z "$DTB" ] && DTB=$(ls qcom/msm8905-qrd-skub*.dtb 2>/dev/null | head -1)
+          [ -z "$DTB" ] && DTB=$(ls qcom/msm8909-qrd.dtb 2>/dev/null | head -1)
+          [ -n "$DTB" ] || { echo "no board dtb found:"; ls qcom/ | grep 890 ; exit 1; }
+          echo "selected $DTB"
+          cp "$DTB" "$GITHUB_WORKSPACE/out-board.dtb"
+
+      - name: Bootstrap Alpine rootfs + initramfs
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/build-initramfs.sh rootfs "$ALPINE_BRANCH" out-ui
+          cd rootfs
+          find . | cpio -o -H newc --owner 0:0 | gzip -9 > ../out-initramfs.cpio.gz
+
+      - name: Pack boot.img
+        run: ./scripts/pack.sh out-zImage out-board.dtb out-initramfs.cpio.gz out/boot.img
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: f320b-boot
+          path: |
+            out/boot.img
+            out-zImage
+            out-board.dtb
+            out-initramfs.cpio.gz

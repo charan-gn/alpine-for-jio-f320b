@@ -1,0 +1,19 @@
+#!/bin/busybox sh
+# f320b-oss init - PID 1. No Android, no OpenRC yet: straight to the UI.
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+/bin/busybox mkdir -p /proc /sys /dev /tmp /run
+/bin/busybox mount -t proc     none     /proc
+/bin/busybox mount -t sysfs    none     /sys
+/bin/busybox mount -t devtmpfs none     /dev 2>/dev/null || /bin/busybox mdev -s
+/bin/busybox echo /bin/mdev > /proc/sys/kernel/hotplug
+/bin/busybox mdev -s
+/bin/busybox mount -t tmpfs none /tmp
+
+echo "f320b-oss: userspace up, starting UI"
+
+# The whole phone OS is this binary.
+/bin/ui
+
+# If UI ever exits, emergency console over USB serial / UART.
+exec /bin/busybox setsid /bin/busybox cttyhack /bin/busybox sh

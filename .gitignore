@@ -1,0 +1,5 @@
+kernel/
+rootfs/
+out/
+out-*
+*.img
