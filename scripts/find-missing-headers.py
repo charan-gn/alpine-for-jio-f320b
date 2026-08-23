@@ -25,8 +25,10 @@ for root in roots:
                 if inc.endswith(".h"):
                     cand = [
                         os.path.join(dirpath, inc),
+                        os.path.join(dirpath, "inc", inc),
+                        os.path.join(tree, "include", inc),
                         os.path.join(tree, inc),
-                        os.path.join(dirpath, "linux", inc),
+                        os.path.join(tree, "arch", "arm", "include", inc),
                     ]
                     if not any(os.path.exists(c) for c in cand):
                         broken.setdefault(inc, []).append(os.path.relpath(p, tree))
