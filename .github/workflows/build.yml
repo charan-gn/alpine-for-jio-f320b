@@ -37,6 +37,14 @@ jobs:
           cp scripts/gcc-wrapper-py3.py kernel/scripts/gcc-wrapper.py
           chmod +x kernel/scripts/gcc-wrapper.py
 
+      - name: Toolchain sanity probes
+        run: |
+          ${CROSS}gcc --version | head -1
+          echo 'int main(void){return 0;}' > /tmp/t.c
+          ${CROSS}gcc -c /tmp/t.c -o /tmp/t.o && echo PLAIN_COMPILE_OK || echo PLAIN_COMPILE_FAIL
+          REAL_CC=$(which ${CROSS}gcc) python3 kernel/scripts/gcc-wrapper.py -c /tmp/t.c -o /tmp/t.o \
+            && echo WRAPPER_COMPILE_OK || echo WRAPPER_COMPILE_FAIL
+
       - name: Kernel config + zImage + DTBs
         run: |
           cd kernel
