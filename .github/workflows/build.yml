@@ -53,6 +53,8 @@ jobs:
           make ARCH=arm CROSS_COMPILE="$CROSS" olddefconfig
           echo "=== effective arch/soc symbols ==="
           grep -E "^(# )?CONFIG_(ARCH_MULTI|CPU_V[4-7]|ARCH_QCOM|ARCH_MSM8909|AEABI)" .config || true
+          echo "=== sample compile line (init/main.o) ==="
+          make ARCH=arm CROSS_COMPILE="$CROSS" V=1 init/main.o 2>&1 | grep -E "gnueabihf-gcc" | head -3 || true
           make ARCH=arm CROSS_COMPILE="$CROSS" -j"$(nproc)" zImage dtbs
           cp arch/arm/boot/zImage ../out-zImage
 
