@@ -40,6 +40,8 @@ jobs:
           python3 scripts/fix-march.py kernel/arch/arm/Makefile
           # binutils>=2.41: rewrite "#function" and ".section #alloc" forms
           python3 scripts/fix-binutils241.py kernel
+          # CLO vendor files with missing headers in public tree
+          python3 scripts/fix-clo-makefiles.py kernel
 
       - name: Toolchain sanity probes
         run: |
