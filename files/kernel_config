@@ -3565,7 +3565,7 @@ CONFIG_ION_MSM=y
 #
 # Qualcomm technologies inc. MSM specific device drivers
 #
-CONFIG_IPA=y
+# CONFIG_IPA is not set
 CONFIG_RMNET_IPA=y
 # CONFIG_GSI is not set
 # CONFIG_ECM_IPA is not set
