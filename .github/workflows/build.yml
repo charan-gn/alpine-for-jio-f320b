@@ -51,6 +51,8 @@ jobs:
           cp ../files/kernel_config .config
           export REAL_CC=$(which ${CROSS}gcc)
           make ARCH=arm CROSS_COMPILE="$CROSS" olddefconfig
+          echo "=== effective arch/soc symbols ==="
+          grep -E "^(# )?CONFIG_(ARCH_MULTI|CPU_V[4-7]|ARCH_QCOM|ARCH_MSM8909|AEABI)" .config || true
           make ARCH=arm CROSS_COMPILE="$CROSS" -j"$(nproc)" zImage dtbs
           cp arch/arm/boot/zImage ../out-zImage
 
