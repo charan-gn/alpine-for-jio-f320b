@@ -32,6 +32,8 @@ jobs:
         run: |
           git clone --depth=1 -b "$KERNEL_BRANCH" \
             https://git.codelinaro.org/clo/la/kernel/msm-4.9.git kernel
+          # CLO trees hijack CC with a python2 wrapper; drop it for python3 runners
+          rm -f kernel/scripts/gcc-wrapper.py
 
       - name: Kernel config + zImage + DTBs
         run: |
