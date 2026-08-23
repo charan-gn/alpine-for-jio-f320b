@@ -40,6 +40,15 @@ jobs:
           python3 scripts/fix-march.py kernel/arch/arm/Makefile
           # binutils>=2.41 rejects "#function" in .type/.size
           bash scripts/fix-binutils241.sh kernel
+          echo "=== proc-v7.S around line 635 ==="
+          sed -n '630,640p' kernel/arch/arm/mm/proc-v7.S | cat -A | head -12 || true
+          echo "=== gas section-flag probes ==="
+          printf '.section ".t", #alloc\n' > /tmp/p1.s
+          printf '.section ".t", %%alloc\n' > /tmp/p2.s
+          printf '.section ".t","a"\n' > /tmp/p3.s
+          ${CROSS}as -march=armv7-a /tmp/p1.s -o /dev/null 2>&1 && echo P1_HASH_OK || echo P1_HASH_FAIL
+          ${CROSS}as -march=armv7-a /tmp/p2.s -o /dev/null 2>&1 && echo P2_PCT_OK || echo P2_PCT_FAIL
+          ${CROSS}as -march=armv7-a /tmp/p3.s -o /dev/null 2>&1 && echo P3_QUOTE_OK || echo P3_QUOTE_FAIL
 
       - name: Toolchain sanity probes
         run: |
