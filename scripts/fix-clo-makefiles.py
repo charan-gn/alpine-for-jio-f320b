@@ -8,6 +8,7 @@ tree = sys.argv[1] if len(sys.argv) > 1 else "kernel"
 # makefile-relative-to-drivers : object basenames to neutralize
 KILLS = [
     ("cpuidle/Makefile", ["lpm-workarounds"]),
+    ("soc/qcom/Makefile", ["tracer_pkt"]),
 ]
 
 for rel, objs in KILLS:
