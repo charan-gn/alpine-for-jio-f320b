@@ -36,6 +36,17 @@ jobs:
           # replace it with a python3 passthrough honoring $REAL_CC
           cp scripts/gcc-wrapper-py3.py kernel/scripts/gcc-wrapper.py
           chmod +x kernel/scripts/gcc-wrapper.py
+          # gcc13 breaks 4.9's cc-option probe -> kbuild falls back to armv5t.
+          # hard-pin armv7-a instead of trusting the probe:
+          python3 - <<'PYEOF'
+p = "kernel/arch/arm/Makefile"
+s = open(p).read()
+s = s.replace(
+    "$(call cc-option,-march=armv7-a,-march=armv5t -Wa$(comma)-march=armv7-a)",
+    "-march=armv7-a",
+)
+open(p, "w").write(s)
+PYEOF
 
       - name: Toolchain sanity probes
         run: |
