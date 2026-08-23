@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
 """Drop-in replacement for CLO's gcc-wrapper.py.
 
-The stock wrapper colorizes warnings using python2 syntax and breaks modern
-runners. This passes all arguments straight through to $REAL_CC (or the
-cross-gcc found in PATH) preserving exit status via execvp.
+CLO kbuild invokes this two ways:
+  1) directly via shebang:      gcc-wrapper.py <flags>
+  2) explicitly through python: python gcc-wrapper.py <cross-gcc> <flags>
+In case 2 the real compiler name is argv[1]; consume it.
+Everything else goes to $REAL_CC (or cross-gcc from PATH).
 """
-import os
-import shutil
+import os, re, shutil, sys
 
-real_cc = os.environ.get("REAL_CC")
-if not real_cc:
-    for candidate in (
-        "arm-linux-gnueabihf-gcc",
-        "aarch64-linux-gnu-gcc",
-        "gcc",
-    ):
-        p = shutil.which(candidate)
+def find_real_cc():
+    cc = os.environ.get("REAL_CC")
+    if cc:
+        return cc
+    for cand in ("arm-linux-gnueabihf-gcc", "aarch64-linux-gnu-gcc", "gcc"):
+        p = shutil.which(cand)
         if p:
-            real_cc = p
-            break
+            return p
+    return "gcc"
 
-argv = sys_argv = None
-import sys
-sys_argv = sys.argv[1:]
+args = sys.argv[1:]
 
-# strip a leading duplicate of ourselves if make passes it back
-if sys_argv and sys_argv[0].endswith("gcc-wrapper.py"):
-    sys_argv = sys_argv[1:]
+# case 2: first arg is the compiler binary itself (no leading dash)
+if args and not args[0].startswith("-"):
+    base = os.path.basename(args[0])
+    if base == "gcc-wrapper.py" or re.search(r"(gcc|cc)(-\d+(\.\d+)*)?$", base):
+        args = args[1:]
 
-os.execvp(real_cc or "gcc", [real_cc or "gcc"] + sys_argv)
+os.execvp(find_real_cc(), [find_real_cc()] + args)
