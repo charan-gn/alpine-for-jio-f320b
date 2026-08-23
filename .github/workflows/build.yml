@@ -38,6 +38,8 @@ jobs:
           chmod +x kernel/scripts/gcc-wrapper.py
           # gcc13 breaks 4.9's cc-option probe -> kbuild falls back to armv5t.
           python3 scripts/fix-march.py kernel/arch/arm/Makefile
+          # binutils>=2.41 rejects "#function" in .type/.size
+          bash scripts/fix-binutils241.sh kernel
 
       - name: Toolchain sanity probes
         run: |
