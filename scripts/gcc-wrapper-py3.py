@@ -21,10 +21,12 @@ def find_real_cc():
 
 args = sys.argv[1:]
 
-# case 2: first arg is the compiler binary itself (no leading dash)
-if args and not args[0].startswith("-"):
+# consume any leading non-flag tokens (our own path and/or compiler name)
+while args and not args[0].startswith("-"):
     base = os.path.basename(args[0])
     if base == "gcc-wrapper.py" or re.search(r"(gcc|cc)(-\d+(\.\d+)*)?$", base):
         args = args[1:]
+    else:
+        break
 
 os.execvp(find_real_cc(), [find_real_cc()] + args)
