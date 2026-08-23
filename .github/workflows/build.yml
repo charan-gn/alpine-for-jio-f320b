@@ -21,6 +21,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf \
+            libc6-dev-armhf-cross \
             bison flex bc lzop cpio xz-utils curl
 
       - name: Build UI binary (static)
