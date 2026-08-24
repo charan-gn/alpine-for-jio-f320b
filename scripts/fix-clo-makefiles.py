@@ -59,3 +59,43 @@ for rel, old, new in SRCREPLACE:
     if old in s:
         open(p, "w").write(s.replace(old, new))
         print(f"patched call in {p}")
+
+# ---- link-time stubs for amputated vendor code ----
+STUBS = r"""/* f320b-oss: no-op replacements for vendor objects whose
+ * sources/headers are missing from the public CLO tree. */
+#include <linux/kernel.h>
+#include <linux/export.h>
+
+void tracer_pkt_log_event(void *pkt, const char *event)
+{
+	(void)pkt; (void)event;
+}
+EXPORT_SYMBOL(tracer_pkt_log_event);
+
+int register_system_pm_ops(const void *ops)
+{
+	(void)ops;
+	return 0;
+}
+EXPORT_SYMBOL(register_system_pm_ops);
+
+int unregister_system_pm_ops(const void *ops)
+{
+	(void)ops;
+	return 0;
+}
+EXPORT_SYMBOL(unregister_system_pm_ops);
+
+void lpm_cpu_hotplug_enter(void)
+{
+}
+EXPORT_SYMBOL(lpm_cpu_hotplug_enter);
+"""
+
+d = f"{tree}/drivers/soc/qcom"
+open(f"{d}/f320b-stubs.c", "w").write(STUBS)
+mk = f"{d}/Makefile"
+cur = open(mk).read()
+if "f320b-stubs.o" not in cur:
+    open(mk, "a").write("\nobj-y += f320b-stubs.o\n")
+    print("added f320b-stubs.o to soc/qcom")
