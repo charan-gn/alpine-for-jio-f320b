@@ -17,6 +17,13 @@ SRCKILLS = [
      ["<function/u_ncm.h>", '"function/u_ncm.h"']),
 ]
 
+# exact-line replacements for unguarded calls into removed code
+SRCREPLACE = [
+    ("drivers/usb/gadget/configfs.c",
+     "value = ncm_ctrlrequest(cdev, c);",
+     "value = -EOPNOTSUPP; /* f320b-oss: NCM removed */"),
+]
+
 for rel, objs in KILLS:
     p = f"{tree}/drivers/{rel}"
     try:
@@ -42,3 +49,13 @@ for rel, frags in SRCKILLS:
     if len(kept) != len(lines):
         open(p, "w").write("\n".join(kept))
         print(f"stripped {len(lines)-len(kept)} include(s) from {p}")
+
+for rel, old, new in SRCREPLACE:
+    p = f"{tree}/{rel}"
+    try:
+        s = open(p).read()
+    except FileNotFoundError:
+        continue
+    if old in s:
+        open(p, "w").write(s.replace(old, new))
+        print(f"patched call in {p}")
