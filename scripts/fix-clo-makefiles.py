@@ -90,6 +90,22 @@ void lpm_cpu_hotplug_enter(void)
 {
 }
 EXPORT_SYMBOL(lpm_cpu_hotplug_enter);
+
+void lpm_cpu_pre_pc_cb(void)
+{
+}
+EXPORT_SYMBOL(lpm_cpu_pre_pc_cb);
+
+void lpm_cpu_post_pc_cb(void)
+{
+}
+EXPORT_SYMBOL(lpm_cpu_post_pc_cb);
+
+int lpm_do_suspend(void)
+{
+	return 0;
+}
+EXPORT_SYMBOL(lpm_do_suspend);
 """
 
 d = f"{tree}/drivers/soc/qcom"
