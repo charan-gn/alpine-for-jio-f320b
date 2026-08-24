@@ -11,6 +11,12 @@ KILLS = [
     ("soc/qcom/Makefile", ["tracer_pkt"]),
 ]
 
+# unconditional includes of headers that don't exist in the public tree
+SRCKILLS = [
+    ("drivers/usb/gadget/configfs.c",
+     ["<function/u_ncm.h>", '"function/u_ncm.h"']),
+]
+
 for rel, objs in KILLS:
     p = f"{tree}/drivers/{rel}"
     try:
@@ -25,3 +31,14 @@ for rel, objs in KILLS:
     if changed:
         open(p, "w").write("\n".join(lines))
         print(f"neutralized {objs} in {p}")
+
+for rel, frags in SRCKILLS:
+    p = f"{tree}/{rel}"
+    try:
+        lines = open(p).read().split("\n")
+    except FileNotFoundError:
+        continue
+    kept = [ln for ln in lines if not any(f in ln for f in frags)]
+    if len(kept) != len(lines):
+        open(p, "w").write("\n".join(kept))
+        print(f"stripped {len(lines)-len(kept)} include(s) from {p}")
