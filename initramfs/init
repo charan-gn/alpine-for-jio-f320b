@@ -3,6 +3,8 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 /bin/busybox mkdir -p /proc /sys /dev /tmp /run
+# apk ran with --no-scripts (foreign-arch bootstrap): create applet links now
+/bin/busybox --install -s
 /bin/busybox mount -t proc     none     /proc
 /bin/busybox mount -t sysfs    none     /sys
 /bin/busybox mount -t devtmpfs none     /dev 2>/dev/null || /bin/busybox mdev -s

@@ -23,7 +23,7 @@ mkdir -p "$ROOT/dev" "$ROOT/proc" "$ROOT/sys" "$ROOT/tmp" "$ROOT/run"
 "$TMP/sbin/apk.static" \
     --arch "$ARCH" \
     -X "$REPO" \
-    -U --allow-untrusted --clean-protected \
+    -U --allow-untrusted --clean-protected --no-scripts \
     --root "$ROOT" --initdb \
     add alpine-base
 
