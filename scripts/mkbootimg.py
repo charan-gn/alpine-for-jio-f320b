@@ -29,7 +29,7 @@ hdr = struct.pack(
     len(ramdisk),
     a.base + a.ramdisk_offset,
     0,                                  # second size
-    a.base + a.second_offset,
+    0 if not second else a.base + a.second_offset,   # match stock: 0 when unused
     a.base + a.tags_offset,
     a.pagesize,
     0, 0,                               # dt_size (dtb appended to kernel), unused

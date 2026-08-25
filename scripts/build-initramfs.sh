@@ -34,4 +34,9 @@ fi
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 install -Dm755 "$HERE/initramfs/init" "$ROOT/init"
 
+# static device nodes so the kernel's initial console works before devtmpfs
+sudo mkdir -p "$ROOT/dev"
+sudo mknod -m 600 "$ROOT/dev/console" c 5 1 2>/dev/null || true
+sudo mknod -m 666 "$ROOT/dev/null"    c 1 3 2>/dev/null || true
+
 echo "[*] rootfs ready: $(du -sh "$ROOT" | cut -f1)"
