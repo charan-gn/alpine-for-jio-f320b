@@ -22,7 +22,7 @@ echo "[*] bootstrapping alpine-base ($ARCH, $BRANCH)"
 mkdir -p "$ROOT/dev" "$ROOT/proc" "$ROOT/sys" "$ROOT/tmp" "$ROOT/run"
 "$TMP/sbin/apk.static" \
     --arch "$ARCH" \
-    -X "$REPO/$ARCH" \
+    -X "$REPO" \
     -U --allow-untrusted --clean-protected \
     --root "$ROOT" --initdb \
     add alpine-base
