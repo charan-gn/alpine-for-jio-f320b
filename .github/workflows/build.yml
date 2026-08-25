@@ -83,7 +83,8 @@ jobs:
           chmod +x scripts/*.sh
           ./scripts/build-initramfs.sh rootfs "$ALPINE_BRANCH" out-ui
           cd rootfs
-          find . | cpio -o -H newc --owner 0:0 > ../out-initramfs.cpio
+          sudo find . | sudo cpio -o -H newc --owner 0:0 > ../out-initramfs.cpio
+          sudo chown "$(id -u):$(id -g)" ../out-initramfs.cpio
           python3 ../scripts/cpio_add_dev.py ../out-initramfs.cpio
           gzip -9f ../out-initramfs.cpio
           ls -la ../out-initramfs.cpio.gz
