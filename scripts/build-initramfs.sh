@@ -20,12 +20,15 @@ tar -xzf "$TMP/apk.apk" -C "$TMP" sbin/apk.static
 
 echo "[*] bootstrapping alpine-base ($ARCH, $BRANCH)"
 mkdir -p "$ROOT/dev" "$ROOT/proc" "$ROOT/sys" "$ROOT/tmp" "$ROOT/run"
-"$TMP/sbin/apk.static" \
+sudo "$TMP/sbin/apk.static" \
     --arch "$ARCH" \
     -X "$REPO" \
     -U --allow-untrusted --clean-protected --no-scripts \
     --root "$ROOT" --initdb \
     add alpine-base
+
+# give the tree back to the invoking user so cpio/tar can read everything
+sudo chown -R "$(id -u):$(id -g)" "$ROOT"
 
 # our world
 if [ -n "$UI" ]; then
@@ -33,10 +36,5 @@ if [ -n "$UI" ]; then
 fi
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 install -Dm755 "$HERE/initramfs/init" "$ROOT/init"
-
-# static device nodes so the kernel's initial console works before devtmpfs
-sudo mkdir -p "$ROOT/dev"
-sudo mknod -m 600 "$ROOT/dev/console" c 5 1 2>/dev/null || true
-sudo mknod -m 666 "$ROOT/dev/null"    c 1 3 2>/dev/null || true
 
 echo "[*] rootfs ready: $(du -sh "$ROOT" | cut -f1)"
